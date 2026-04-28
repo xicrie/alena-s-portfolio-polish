@@ -15,7 +15,7 @@ type Particle = {
   color: string;
   pulseOffset: number;
   pulseSpeed: number;
-  assemblyLevel: number; // От 0 (космос) до 1 (в фигуре)
+  assemblyLevel: number;
 };
 
 const PremiumBackground = () => {
@@ -30,11 +30,11 @@ const PremiumBackground = () => {
     const ctx = canvas.getContext("2d", { alpha: true });
     if (!ctx) return;
 
-    // --- МАТЕМАТИЧЕСКИЕ КОНТУРЫ ---
+    // --- МАТЕМАТИЧЕСКИЕ КОНТУРЫ (Идеи, Технологии) ---
     const SVGS = [
-      "M25 1 C36 7 45 16 49 25 C45 34 36 43 25 49 C14 43 5 34 1 25 C5 16 14 7 25 1 Z", // Мозг/Идея
-      "M25 0 L47 13 L47 37 L25 50 L3 37 L3 13 Z", // Гексагон/Структура
-      "M25 2 C13 2 5 10 5 22 C5 31 13 38 20 41 L20 48 L30 48 L30 41 C37 38 45 31 45 22 C45 10 37 2 25 2 Z", // Лампа/Инсайт
+      "M25 1 C36 7 45 16 49 25 C45 34 36 43 25 49 C14 43 5 34 1 25 C5 16 14 7 25 1 Z", // Нейросеть / Мозг
+      "M25 0 L47 13 L47 37 L25 50 L3 37 L3 13 Z", // Структура / Гексагон
+      "M25 2 C13 2 5 10 5 22 C5 31 13 38 20 41 L20 48 L30 48 L30 41 C37 38 45 31 45 22 C45 10 37 2 25 2 Z", // Инсайт / Лампа
     ];
 
     let animationId = 0;
@@ -44,22 +44,21 @@ const PremiumBackground = () => {
 
     const currentMouse = { x: -9999, y: -9999 };
     const lastMouse = { x: -9999, y: -9999 };
-    // Центр, где фигура зафиксировалась для сборки
     const assemblyAnchor = { x: -9999, y: -9999 }; 
     
     let isMouseMoving = false;
     let moveTimeout: NodeJS.Timeout;
     let activeShapeIndex = 0;
 
-    // Палитра 3D
-    const amberNear = ["251, 191, 36", "253, 224, 71"];     
-    const amberMid = ["245, 158, 11", "217, 119, 6"];       
-    const lilacFar = ["167, 139, 250", "148, 163, 184"];    
+    // ЧИСТАЯ ПАЛИТРА ДЛЯ СВЕТЛОГО САЙТА (Без темных/серых точек)
+    const colorNear = ["251, 191, 36", "253, 224, 71"];     // Крупные ближние: Янтарь и Золото
+    const colorMid = ["245, 158, 11", "234, 88, 12"];       // Средние: Глубокий Оранж
+    const colorFar = ["216, 180, 254", "192, 132, 252"];    // Дальние: Мягкий, яркий сиреневый (космос)
 
     const pickColor = (z: number) => {
-      if (z > 1.1) return amberNear[Math.floor(Math.random() * amberNear.length)];
-      if (z > 0.6) return amberMid[Math.floor(Math.random() * amberMid.length)];
-      return lilacFar[Math.floor(Math.random() * lilacFar.length)];
+      if (z > 1.2) return colorNear[Math.floor(Math.random() * colorNear.length)];
+      if (z > 0.7) return colorMid[Math.floor(Math.random() * colorMid.length)];
+      return colorFar[Math.floor(Math.random() * colorFar.length)];
     };
 
     const generateShapeClouds = (count: number) => {
@@ -76,9 +75,7 @@ const PremiumBackground = () => {
           const y = Math.random() * 50;
 
           if (offCtx.isPointInPath(path, x, y)) {
-            const nx = (x - 25) / 25;
-            const ny = (y - 25) / 25;
-            pts.push({ x: nx, y: ny });
+            pts.push({ x: (x - 25) / 25, y: (y - 25) / 25 });
           }
           attempts++;
         }
@@ -90,15 +87,16 @@ const PremiumBackground = () => {
       particles = [];
       const area = w * h;
       
-      const nodeCount = Math.min(Math.max(Math.floor(area / 4500), 160), 320);
-      const shapeNodeCount = Math.floor(nodeCount * 0.7);
+      const nodeCount = Math.min(Math.max(Math.floor(area / 4000), 160), 300);
+      const shapeNodeCount = Math.floor(nodeCount * 0.75);
 
       shapeClouds = generateShapeClouds(shapeNodeCount);
       activeShapeIndex = Math.floor(Math.random() * shapeClouds.length);
       const cloud = shapeClouds[activeShapeIndex] || [];
 
       for (let i = 0; i < nodeCount; i++) {
-        const z = Math.random() * 1.4 + 0.2; 
+        // Увеличил разброс глубины (Z) от 0.3 до 1.7 для мощного 3D-эффекта
+        const z = Math.random() * 1.4 + 0.3; 
         const isShapeNode = i < shapeNodeCount;
         const pt = isShapeNode && cloud.length ? cloud[i % cloud.length] : { x: 0, y: 0 };
 
@@ -106,15 +104,16 @@ const PremiumBackground = () => {
           x: Math.random() * w,
           y: Math.random() * h,
           z,
-          vx: (Math.random() - 0.5) * 0.5, 
-          vy: (Math.random() - 0.5) * 0.5,
+          vx: (Math.random() - 0.5) * 0.3, 
+          vy: (Math.random() - 0.5) * 0.3,
           isShapeNode,
           shapeX: pt.x,
           shapeY: pt.y,
-          baseSize: Math.random() * 1.5 + 1.0,
+          // Увеличил базовый размер: теперь они крупнее и заметнее
+          baseSize: Math.random() * 2.0 + 1.5,
           color: pickColor(z),
           pulseOffset: Math.random() * Math.PI * 10,
-          pulseSpeed: Math.random() * 2.5 + 1.5, // Увеличил скорость пульсации нейронов
+          pulseSpeed: Math.random() * 2.0 + 1.0, 
           assemblyLevel: 0, 
         });
       }
@@ -133,50 +132,47 @@ const PremiumBackground = () => {
       init(rect.width, rect.height);
     };
 
-    // Отрисовка синапсов и ВСПЫШЕК нейронов
     const drawSynapse = (
       x1: number, y1: number, x2: number, y2: number,
       opacity: number, depth: number, assembly: number, pulseOffset: number, pulseSpeed: number
     ) => {
-      // 1. Паутина (очень мягкая)
+      // Плавная линия связи
       const grad = ctx.createLinearGradient(x1, y1, x2, y2);
-      grad.addColorStop(0, `rgba(245, 158, 11, ${opacity * 0.2})`);
-      grad.addColorStop(0.5, `rgba(251, 191, 36, ${opacity * 0.5})`);
-      grad.addColorStop(1, `rgba(245, 158, 11, ${opacity * 0.2})`);
+      grad.addColorStop(0, `rgba(245, 158, 11, ${opacity * 0.3})`);
+      grad.addColorStop(0.5, `rgba(251, 191, 36, ${opacity * 0.8})`);
+      grad.addColorStop(1, `rgba(245, 158, 11, ${opacity * 0.3})`);
 
       ctx.beginPath();
       ctx.strokeStyle = grad;
-      ctx.lineWidth = Math.max(0.4, depth * (0.5 + assembly * 0.5));
+      // Линии стали чуть толще и заметнее
+      ctx.lineWidth = Math.max(0.6, depth * (0.8 + assembly * 0.5));
       ctx.moveTo(x1, y1);
       ctx.lineTo(x2, y2);
       ctx.stroke();
 
-      // 2. НЕЙРОННЫЕ ВСПЫШКИ (Быстрые, с затуханием)
-      if (opacity > 0.1) {
-        // Делаем импульс очень быстрым
-        const progress = (time * pulseSpeed * 1.5 + pulseOffset) % 1.5; 
+      // НЕЙРОННЫЕ СИГНАЛЫ (Вспышки, которые бегают по связям)
+      if (opacity > 0.15) {
+        const progress = (time * pulseSpeed + pulseOffset) % 1.5; 
         
-        // Вспышка происходит только в начале цикла (от 0 до 1), потом пауза (от 1 до 1.5)
         if (progress <= 1) {
-          // Математика вспышки (резко загорается, плавно гаснет)
           const flashIntensity = Math.sin(progress * Math.PI);
-          const signalOpacity = flashIntensity * opacity * 2.5;
+          const signalOpacity = flashIntensity * opacity * 2.0;
 
           if (signalOpacity > 0.05) {
             const signalX = x1 + (x2 - x1) * progress;
             const signalY = y1 + (y2 - y1) * progress;
-            const signalSize = Math.max(1.5, depth * 2.2);
+            const signalSize = Math.max(2.0, depth * 2.5); // Крупные вспышки
 
-            // Мягкое свечение вспышки
+            // Оранжевое/Золотое свечение вокруг вспышки (чтобы было видно на белом)
             ctx.beginPath();
-            ctx.arc(signalX, signalY, signalSize * 3, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(255, 255, 255, ${signalOpacity * 0.3})`;
+            ctx.arc(signalX, signalY, signalSize * 2.5, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(245, 158, 11, ${signalOpacity * 0.5})`;
             ctx.fill();
 
-            // Яркое ядро
+            // Яркое белое ядро вспышки
             ctx.beginPath();
             ctx.arc(signalX, signalY, signalSize, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(255, 255, 255, ${Math.min(1, signalOpacity)})`;
+            ctx.fillStyle = `rgba(255, 255, 255, ${Math.min(1, signalOpacity * 1.5)})`;
             ctx.fill();
           }
         }
@@ -209,7 +205,8 @@ const PremiumBackground = () => {
           if (currentMouse.x > -1000) {
             assemblyAnchor.x = currentMouse.x;
             assemblyAnchor.y = currentMouse.y;
-            // При новой остановке меняем форму
+            
+            // Плавно меняем форму при новой остановке
             activeShapeIndex = (activeShapeIndex + 1) % shapeClouds.length;
             const cloud = shapeClouds[activeShapeIndex];
             let pIndex = 0;
@@ -222,78 +219,76 @@ const PremiumBackground = () => {
               }
             });
           }
-        }, 300); // Мышь должна постоять 0.3 сек
+        }, 250); 
       }
 
-      // Базовый параллакс камеры
+      // Базовый параллакс (камера слегка следует за курсором)
       const parallaxBaseX = hasMouse ? currentMouse.x : w / 2;
       const parallaxBaseY = hasMouse ? currentMouse.y : h / 2;
       
       const shapeScale = Math.min(w, h) * 0.38;
       const gravityRadius = Math.min(w, h) * 0.5;
 
-      // 1. ФИЗИКА
+      // 1. ФИЗИКА (Гравитация и Инерция)
       particles.forEach((p) => {
-        // Расстояние до ЯКОРЯ сборки (а не до бегающего курсора)
         const dxAnchor = assemblyAnchor.x - p.x;
         const dyAnchor = assemblyAnchor.y - p.y;
         const distToAnchor = Math.sqrt(dxAnchor * dxAnchor + dyAnchor * dyAnchor) || 1;
 
-        // Если мышь движется - фигура РАССЫПАЕТСЯ (уровень сборки падает)
+        // Если мышь движется - фигура плавно РАССЫПАЕТСЯ
         if (isMouseMoving || !hasMouse) {
-          p.assemblyLevel = Math.max(0, p.assemblyLevel - 0.04);
+          p.assemblyLevel = Math.max(0, p.assemblyLevel - 0.03);
         } else if (distToAnchor < gravityRadius) {
-          // Если мышь стоит и точка в радиусе якоря - СБИРАЕМ
+          // Если мышь стоит и точка рядом - ПЛАВНО СТЯГИВАЕМ
           const pullStrength = 1 - (distToAnchor / gravityRadius);
           p.assemblyLevel = Math.min(1, p.assemblyLevel + 0.015 * pullStrength);
         } else {
-          // Точка далеко от якоря - забывает про фигуру
           p.assemblyLevel = Math.max(0, p.assemblyLevel - 0.02);
         }
 
         if (p.isShapeNode && p.assemblyLevel > 0.01) {
-          // Притяжение к позиции в фигуре (относительно якоря)
+          // Мягкое притяжение к точке в фигуре
           const targetX = assemblyAnchor.x + p.shapeX * shapeScale * p.z;
           const targetY = assemblyAnchor.y + p.shapeY * shapeScale * p.z;
 
-          const pullForce = 0.02 * p.assemblyLevel;
+          const pullForce = 0.015 * p.assemblyLevel;
           p.vx += (targetX - p.x) * pullForce;
           p.vy += (targetY - p.y) * pullForce;
         } else {
-          // КОСМИЧЕСКИЙ ДРЕЙФ (Более активный, чтобы фон жил)
-          p.vx += (Math.random() - 0.5) * 0.06;
-          p.vy += (Math.random() - 0.5) * 0.06;
+          // КОСМИЧЕСКИЙ ДРЕЙФ: плавно, без резких рывков
+          p.vx += (Math.random() - 0.5) * 0.03;
+          p.vy += (Math.random() - 0.5) * 0.03;
           
-          // Легкое отталкивание от самого курсора (создает интерактив)
+          // Отталкивание от самого курсора, чтобы точки обтекали его
           if (hasMouse) {
             const dxCursor = p.x - currentMouse.x;
             const dyCursor = p.y - currentMouse.y;
             const distCursor = Math.sqrt(dxCursor * dxCursor + dyCursor * dyCursor);
-            if (distCursor < 150) {
-                const repelForce = (150 - distCursor) * 0.0002;
+            if (distCursor < 180) {
+                const repelForce = (180 - distCursor) * 0.00015;
                 p.vx += (dxCursor / distCursor) * repelForce;
                 p.vy += (dyCursor / distCursor) * repelForce;
             }
           }
         }
 
-        // Ограничитель скорости (убираем безумие по углам)
+        // Ограничение скорости (чтобы не было хаоса)
         const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
-        const maxSpeed = p.assemblyLevel > 0 ? 3 : 1.5; // В фигуре могут двигаться быстрее, в космосе медленно
+        const maxSpeed = p.assemblyLevel > 0 ? 3.5 : 1.5; 
         if (speed > maxSpeed) {
             p.vx = (p.vx / speed) * maxSpeed;
             p.vy = (p.vy / speed) * maxSpeed;
         }
 
-        // Трение (очень мягкое)
-        const friction = 0.96 - (0.04 * p.assemblyLevel);
+        // Мягкое трение
+        const friction = 0.95 - (0.04 * p.assemblyLevel);
         p.vx *= friction;
         p.vy *= friction;
 
         p.x += p.vx;
         p.y += p.vy;
 
-        // Бесшовный космос
+        // Бесшовный экран
         const margin = 100;
         if (p.x < -margin) p.x = w + margin;
         if (p.x > w + margin) p.x = -margin;
@@ -301,22 +296,22 @@ const PremiumBackground = () => {
         if (p.y > h + margin) p.y = -margin;
       });
 
-      // 2. ОТРИСОВКА СВЯЗЕЙ (Активнее в фоне)
+      // 2. ОТРИСОВКА СВЯЗЕЙ (Они теперь АКТИВНЫ в фоне)
       for (let i = 0; i < particles.length; i++) {
         const p1 = particles[i];
         let connections = 0;
 
-        const drawX1 = p1.x + (parallaxBaseX - w / 2) * p1.z * 0.04;
-        const drawY1 = p1.y + (parallaxBaseY - h / 2) * p1.z * 0.04;
+        const drawX1 = p1.x + (parallaxBaseX - w / 2) * p1.z * 0.03;
+        const drawY1 = p1.y + (parallaxBaseY - h / 2) * p1.z * 0.03;
 
         for (let j = i + 1; j < particles.length; j++) {
           if (connections > 4) break; 
 
           const p2 = particles[j];
-          if (Math.abs(p1.z - p2.z) > 0.5) continue;
+          if (Math.abs(p1.z - p2.z) > 0.6) continue; // Связываем только близкие по Z слои
 
-          const drawX2 = p2.x + (parallaxBaseX - w / 2) * p2.z * 0.04;
-          const drawY2 = p2.y + (parallaxBaseY - h / 2) * p2.z * 0.04;
+          const drawX2 = p2.x + (parallaxBaseX - w / 2) * p2.z * 0.03;
+          const drawY2 = p2.y + (parallaxBaseY - h / 2) * p2.z * 0.03;
 
           const dx = drawX1 - drawX2;
           const dy = drawY1 - drawY2;
@@ -325,15 +320,15 @@ const PremiumBackground = () => {
           const depth = (p1.z + p2.z) / 2;
           const assembly = (p1.assemblyLevel + p2.assemblyLevel) / 2;
           
-          // В фоне связи тоже есть, просто короче
-          const maxDist = 70 + (70 * assembly) + (depth * 30);
+          // В фоне (assembly = 0) дистанция связи всё равно большая, они связываются
+          const maxDist = 120 + (80 * assembly) + (depth * 30);
 
           if (dist < maxDist) {
             connections++;
 
             const distanceAlpha = Math.pow((maxDist - dist) / maxDist, 1.2);
-            // Фон тоже связывается (базовый opacity 0.15), в фигуре ярче
-            const opacity = Math.min(0.85, distanceAlpha * (0.15 + assembly * 0.7) * depth);
+            // Повысил базовое значение opacity до 0.35, чтобы в фоне связи были отлично видны
+            const opacity = Math.min(0.9, distanceAlpha * (0.35 + assembly * 0.65) * depth);
 
             drawSynapse(
               drawX1, drawY1, drawX2, drawY2,
@@ -345,35 +340,44 @@ const PremiumBackground = () => {
         }
       }
 
-      // 3. ОТРИСОВКА УЗЛОВ (Настоящее мягкое свечение)
+      // 3. ОТРИСОВКА УЗЛОВ (Звезды / 3D-сферы)
       particles.forEach((p) => {
-        const drawX = p.x + (parallaxBaseX - w / 2) * p.z * 0.04;
-        const drawY = p.y + (parallaxBaseY - h / 2) * p.z * 0.04;
+        const drawX = p.x + (parallaxBaseX - w / 2) * p.z * 0.03;
+        const drawY = p.y + (parallaxBaseY - h / 2) * p.z * 0.03;
 
-        const pulse = Math.sin(time * 3 + p.pulseOffset) * 0.2 + 0.8;
-        const size = p.baseSize * Math.pow(p.z, 1.2) * pulse * (1 + p.assemblyLevel * 0.2);
-        const alpha = Math.min(0.25 + p.z * 0.6 + p.assemblyLevel * 0.15, 1);
+        const pulse = Math.sin(time * 3 + p.pulseOffset) * 0.15 + 0.85;
+        
+        // Мощный 3D размер: ближние (z > 1.5) будут ОГРОМНЫМИ, дальние (z < 0.5) мелкими
+        const size = p.baseSize * Math.pow(p.z, 1.6) * pulse * (1 + p.assemblyLevel * 0.2);
+        
+        // Ближние точки яркие, дальние слегка прозрачные
+        const alpha = Math.min(0.4 + p.z * 0.5 + p.assemblyLevel * 0.1, 1);
 
-        // МЯГКОЕ СВЕЧЕНИЕ (Градиент вместо жесткого круга)
-        // Рисуем свечение только для ближних или собранных точек
-        if (p.z > 0.8 || p.assemblyLevel > 0.3) {
-            const glowSize = size * 4;
-            const glowGrad = ctx.createRadialGradient(drawX, drawY, 0, drawX, drawY, glowSize);
-            glowGrad.addColorStop(0, `rgba(${p.color}, ${alpha * 0.4})`);
-            glowGrad.addColorStop(0.3, `rgba(${p.color}, ${alpha * 0.15})`);
-            glowGrad.addColorStop(1, `rgba(${p.color}, 0)`);
-            
-            ctx.beginPath();
-            ctx.fillStyle = glowGrad;
-            ctx.arc(drawX, drawY, glowSize, 0, Math.PI * 2);
-            ctx.fill();
-        }
-
-        // Ядро
+        // Оптическое свечение (Glow) вокруг шарика
+        const glowSize = size * 3.5;
+        const glowGrad = ctx.createRadialGradient(drawX, drawY, 0, drawX, drawY, glowSize);
+        glowGrad.addColorStop(0, `rgba(${p.color}, ${alpha * 0.4})`);
+        glowGrad.addColorStop(0.4, `rgba(${p.color}, ${alpha * 0.1})`);
+        glowGrad.addColorStop(1, `rgba(${p.color}, 0)`);
+        
         ctx.beginPath();
-        ctx.arc(drawX, drawY, Math.max(size, 0.5), 0, Math.PI * 2);
+        ctx.fillStyle = glowGrad;
+        ctx.arc(drawX, drawY, glowSize, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Основное плотное ядро
+        ctx.beginPath();
+        ctx.arc(drawX, drawY, Math.max(size, 0.8), 0, Math.PI * 2);
         ctx.fillStyle = `rgba(${p.color}, ${alpha})`;
         ctx.fill();
+        
+        // Блик для самых крупных 3D-шариков (стеклянный эффект)
+        if (p.z > 1.2) {
+          ctx.beginPath();
+          ctx.arc(drawX - size * 0.25, drawY - size * 0.25, size * 0.35, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.4})`;
+          ctx.fill();
+        }
       });
 
       animationId = requestAnimationFrame(animate);

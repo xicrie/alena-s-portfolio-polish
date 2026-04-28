@@ -12,7 +12,11 @@ export default defineConfig(({ mode }) => ({
       overlay: false,
     },
   },
-  plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
+  // Мы убрали .filter(), чтобы Cloudflare увидел чистый массив
+  plugins: [
+    react(),
+    mode === "development" ? componentTagger() : null
+  ],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

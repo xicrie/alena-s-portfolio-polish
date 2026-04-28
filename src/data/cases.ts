@@ -27,7 +27,7 @@ export const cases: PortfolioCase[] = [
     companyDescription:
       "Аккредитованная IT-компания и цифровой интегратор. Работа с контентом для сложных цифровых продуктов и B2B-направления.",
     tags: ["IT", "PropTech", "Примеры текстов", "Упаковка кейсов"],
-    image: "/images/chatgpt-cover.png",
+    image: "/images/case-proptech.png",
     status: "Релиз ожидается весной",
   },
   {
@@ -40,7 +40,7 @@ export const cases: PortfolioCase[] = [
     companyDescription:
       "Аккредитованная IT-компания и цифровой интегратор. Работа с контентом для сложных цифровых продуктов и B2B-направления.",
     tags: ["IT", "PropTech", "Примеры текстов", "Статьи"],
-    image: "/images/generated-image_2.png",
+    image: "/images/case-article.png",
     link: "https://guides.kts.tech/proptech-trendy-2026/",
     linkLabel: "Читать на сайте",
   },
@@ -54,7 +54,7 @@ export const cases: PortfolioCase[] = [
     companyDescription:
       "Аккредитованная IT-компания и цифровой интегратор. Работа с контентом для сложных цифровых продуктов и B2B-направления.",
     tags: ["IT", "PropTech", "Примеры текстов", "Тексты рассылок", "Email"],
-    image: "/images/generated-image_4.png",
+    image: "/images/case-email-2.png",
     status: "Два примера писем внутри кейса",
   },
 ];

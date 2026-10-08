@@ -1,10 +1,14 @@
+
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 
-// https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
+  base: process.env.GITHUB_ACTIONS === "true"
+    ? "/alena-s-portfolio-polish/"
+    : "/",
+
   server: {
     host: "::",
     port: 8080,
@@ -12,15 +16,21 @@ export default defineConfig(({ mode }) => ({
       overlay: false,
     },
   },
-  // Мы убрали .filter(), чтобы Cloudflare увидел чистый массив
+
   plugins: [
     react(),
-    mode === "development" ? componentTagger() : null
+    mode === "development" ? componentTagger() : null,
   ],
+
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
-    dedupe: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime"],
+    dedupe: [
+      "react",
+      "react-dom",
+      "react/jsx-runtime",
+      "react/jsx-dev-runtime",
+    ],
   },
 }));
